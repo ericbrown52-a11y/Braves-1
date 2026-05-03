@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-<title>CG Braves 12U Baseball - V10.1 Season Stats</title>
+<title>Council Grove Braves 12U Baseball - Auto Boot</title>
 <style>
 :root{
   --blue:#0b3f98;
@@ -280,6 +280,14 @@ button:disabled{opacity:.38;transform:none}
   #statsTable{font-size:10px}
   #statsTable th,#statsTable td{padding:5px 4px}
   #statsTable td:first-child,#statsTable th:first-child{min-width:92px;max-width:110px;overflow:hidden;text-overflow:ellipsis}
+}
+
+
+/* Auto-boot safety patch: no start screen gate */
+#titleScreen, .titleScreen, #startScreen, .startScreen, #homeScreen, .homeScreen {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 </style>
@@ -1450,6 +1458,33 @@ button:disabled{opacity:.38;transform:none}
     </div>
   </div>
 </div>
+
+
+<script>
+/* Auto-boot safety net: if a start screen or modal blocks the backend, clear it and force gameplay state. */
+(function(){
+  function autoBootGame(){
+    try{
+      ["titleScreen","startScreen","homeScreen"].forEach(function(id){
+        var el=document.getElementById(id);
+        if(el){ el.classList.add("hidden"); el.style.display="none"; el.style.pointerEvents="none"; }
+      });
+      document.querySelectorAll(".titleScreen,.startScreen,.homeScreen").forEach(function(el){
+        el.classList.add("hidden"); el.style.display="none"; el.style.pointerEvents="none";
+      });
+      // Pressing reset is the safest public control for this build: it returns to a live Braves at-bat.
+      var reset=document.getElementById("resetBtn");
+      if(reset && !window.__bravesAutoBooted){
+        window.__bravesAutoBooted=true;
+        setTimeout(function(){ try{ reset.click(); }catch(e){} }, 150);
+      }
+    }catch(e){}
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", autoBootGame);
+  else autoBootGame();
+  setTimeout(autoBootGame,500);
+})();
+</script>
 
 </body>
 </html>
